@@ -12,7 +12,6 @@
 
 int test();
 int calculate(char *);
-char *replace_numbers(char *);
 int test_replace();
 
 int main(int argc, char **argv)
@@ -47,7 +46,7 @@ int calculate(char *input_file)
     fp = fopen(input_file, "r");
     if (fp == NULL)
     {
-        fprintf(stderr, "error opening file: %s\n", errno);
+        fprintf(stderr, "error opening file: %s\n", strerror(errno));
         return EXIT_FAILURE;
     }
 
@@ -55,15 +54,15 @@ int calculate(char *input_file)
     char *buf_p = fgets(buf, BUF_LEN - 1, fp);
     while (buf_p != NULL)
     {
-        running_total += find_first(buf_p, BUF_LEN) * 10;
-        running_total += find_last(buf_p, BUF_LEN);
+        running_total += find_first(buf_p) * 10;
+        running_total += find_last(buf_p);
         memset(buf, 0, BUF_LEN);
         buf_p = fgets(buf, BUF_LEN - 1, fp);
     }
 
-    printf("total: %d", running_total);
+    printf("total: %lld", running_total);
+    return EXIT_SUCCESS;
 }
-
 
 typedef struct test_replace_case
 {
@@ -89,10 +88,10 @@ int test_replace()
     for (int i = 0; cases[i].input != NULL; i++)
     {
         char *input = strdup(cases[i].input);
-        char *result = replace_numbers(input);
-        if (strcmp(result, cases[i].expected) != 0)
+        replace_numbers(input);
+        if (strcmp(input, cases[i].expected) != 0)
         {
-            printf("failed %s got %s expected %s\n", cases[i].input, result, cases[i].expected);
+            printf("failed %s got %s expected %s\n", cases[i].input, input, cases[i].expected);
             failures++;
         }
         free(input);

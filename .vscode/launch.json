@@ -8,7 +8,7 @@
             "name": "(gdb) day1",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/2023/day1/day1.exe",
+            "program": "${workspaceFolder}/2023/run/day1",
             "args": [
                 "test_replace"
             ],
@@ -17,7 +17,6 @@
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
-            "miDebuggerPath": "C:\\dev\\msys64\\usr\\bin\\gdb.exe",
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",
@@ -29,7 +28,10 @@
                     "text": "-gdb-set disassembly-flavor intel",
                     "ignoreFailures": true
                 }
-            ]
+            ],
+            "osx": {
+                "MIMode": "lldb"
+            }
         }
     ]
 }

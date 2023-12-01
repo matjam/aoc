@@ -5,6 +5,8 @@
 *.so
 *.dylib
 *.stackdump
+2023/run/*.dSYM
+
 
 # Test binary, built with `go test -c`
 *.test
