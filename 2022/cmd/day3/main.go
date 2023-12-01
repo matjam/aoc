@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/matjam/aoc2022/util"
+	"github.com/matjam/aoc/2022/util"
 )
 
 // recursively find the first character in the first string that is also in the second

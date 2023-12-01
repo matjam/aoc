@@ -5,12 +5,31 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Launch Package",
-            "type": "go",
+            "name": "(gdb) day1",
+            "type": "cppdbg",
             "request": "launch",
-            "mode": "auto",
-            "program": "${fileDirname}",
-            "cwd": "${workspaceFolder}"
+            "program": "${workspaceFolder}/2023/day1/day1.exe",
+            "args": [
+                "test_replace"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "C:\\dev\\msys64\\usr\\bin\\gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
         }
     ]
 }

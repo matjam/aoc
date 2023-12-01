@@ -1,3 +1,3 @@
-module github.com/matjam/aoc2022
+module github.com/matjam/aoc
 
 go 1.19

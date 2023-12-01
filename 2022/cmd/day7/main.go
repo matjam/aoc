@@ -1,6 +1,6 @@
 package main
 
-import "github.com/matjam/aoc2022/util"
+import "github.com/matjam/aoc/2022/util"
 
 func main() {
 	lines := util.GetInputLines("input/day7test.txt")

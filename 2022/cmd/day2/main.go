@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/matjam/aoc2022/util"
+	"github.com/matjam/aoc/2022/util"
 )
 
 type hand int
