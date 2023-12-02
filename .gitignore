@@ -7,6 +7,14 @@
 *.stackdump
 *.dSYM
 *.o
+out
+
+# VS special stuff
+.vs/aoc
+.vs/aoc-cmake
+.vs/*.sqlite
+.vs/CMake*
+.vs/cmake.db
 
 
 # Test binary, built with `go test -c`
