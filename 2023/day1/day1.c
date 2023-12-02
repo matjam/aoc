@@ -5,142 +5,32 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <unistd.h>
 
-#include "strutil.h"
-
-#define BUF_LEN 100
-
-int test();
-int calculate(char *);
-int test_replace();
-
-int main(int argc, char **argv)
-{
-    // if (argc != 2)
-    // {
-    //     fprintf(stderr, "please provide the input file\n");
-    // }
-
-    // if (argc == 2 && strcmp(argv[1], "test") == 0)
-    // {
-    //     return test();
-    // }
-
-    // if (argc == 2 && strcmp(argv[1], "test_replace") == 0)
-    // {
-    return test_replace();
-    // }
-
-    // return calculate(argv[1]);
-}
-
-int calculate(char *input_file)
-{
-    char *buf = calloc(BUF_LEN, sizeof(char));
-    FILE *fp;
-    int64_t running_total = 0; // probably doesn't need to be this big lol
-
-    // just to be sure the buffer is truly clean.
-    memset(buf, 0, BUF_LEN);
-
-    fp = fopen(input_file, "r");
-    if (fp == NULL)
-    {
-        fprintf(stderr, "error opening file: %s\n", strerror(errno));
-        return EXIT_FAILURE;
-    }
-
-    // read each line in the file and make a running total.
-    char *buf_p = fgets(buf, BUF_LEN - 1, fp);
-    while (buf_p != NULL)
-    {
-        running_total += find_first(buf_p) * 10;
-        running_total += find_last(buf_p);
-        memset(buf, 0, BUF_LEN);
-        buf_p = fgets(buf, BUF_LEN - 1, fp);
-    }
-
-    printf("total: %lld", running_total);
-    return EXIT_SUCCESS;
-}
-
-typedef struct test_replace_case
-{
-    char *input;
-    char *expected;
-} test_replace_case_t;
-
-int test_replace()
-{
-    test_replace_case_t cases[] = {
-        {"two1nine", "219"},
-        {"eightwothree", "823"},
-        {"abcone2threexyz", "abc123xyz"},
-        {"xtwone3four", "x2ne34"},
-        {"4nineeightseven2", "49872"},
-        {"zoneight234", "z1234"},
-        {"7pqrstsixteen", "7pqrst6teen"},
-        {NULL, NULL},
-    };
-
-    int failures = 0;
-
-    for (int i = 0; cases[i].input != NULL; i++)
-    {
-        char *input = strdup(cases[i].input);
-        replace_numbers(input);
-        if (strcmp(input, cases[i].expected) != 0)
-        {
-            printf("failed %s got %s expected %s\n", cases[i].input, input, cases[i].expected);
-            failures++;
-        }
-        free(input);
-    }
-
-    if (failures != 0)
-    {
-        return EXIT_FAILURE;
-    }
-
-    printf("tests passed\n");
-    return EXIT_SUCCESS;
-}
-
-typedef struct test_case
-{
-    char *input;
-    int expected_first;
-    int expected_last;
-} test_case_t;
+#include "common.h"
+#include "parts.h"
 
 int test()
 {
-    int failures = 0;
+    part1_test();
+    part2_test();
+}
 
-    test_case_t test_cases[] = {
-        {"6qghmzchmtjktjkbseightczbjmsvmrk88cgctthsbz", 6, 8},
-        {"12", 1, 2},
-        {"aaa1aaa2aaa", 1, 2},
-        {NULL, 0, 0},
-    };
+int main(int argc, char **argv)
+{
+    // because when you run under the debugger, you get a bunch of parameters we need
+    // to loop until we find a parameter we know, or just run the main.
 
-    for (int i = 0; test_cases[i].input != NULL; i++)
+    for (int c = 0; c < argc; c++)
     {
-        int first = find_first(test_cases[i].input);
-        int last = find_last(test_cases[i].input);
-
-        if (first != test_cases[i].expected_first || last != test_cases[i].expected_last)
+        if (strcmp(argv[1], "test") == 0)
         {
-            printf("failed %s got %d,%d\n", test_cases[i].input, first, last);
-            failures++;
+            return test();
         }
     }
 
-    if (failures != 0)
-    {
-        return EXIT_FAILURE;
-    }
+    part1("day1/input.txt");
+    part2("day1/input.txt");
 
-    printf("tests passed\n");
     return EXIT_SUCCESS;
 }
