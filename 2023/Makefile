@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-g -std=gnu17
+CFLAGS=-g -std=gnu17 -Wall
 
 COMMON_HEADERS := $(shell find common -name '*.h')
 COMMON_SRC := $(shell find common -name '*.c')
