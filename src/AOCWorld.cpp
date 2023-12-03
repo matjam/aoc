@@ -1,5 +1,7 @@
-#include "AOCWorld.h"
 #include <string>
+
+#include "AOCWorld.hpp"
+#include "2023/day2/Day2.hpp"
 
 using namespace std;
 
@@ -17,10 +19,10 @@ AOCWorld::AOCWorld()
 }
 
 void worker(AOCRenderer *renderer) {
-    while (true) {
-        sf::sleep(sf::milliseconds(1000));
-        renderer->writeText("writing some shit\n");
-    }
+    Day2 day2(renderer);
+
+
+    day2.run();
 }
 
 int AOCWorld::start()
@@ -68,11 +70,11 @@ void AOCWorld::processEvents()
         case sf::Event::TextEntered:
             if (31 < event.text.unicode < 127) {
                 string s(1, (char) event.text.unicode);
-                renderer.writeText(s);
+                renderer.print(s);
             }
 
             if (event.text.unicode == 13) {
-                renderer.writeText("\n");
+                renderer.print("\n");
             }
 
             break;

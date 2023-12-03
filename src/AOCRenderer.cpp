@@ -1,5 +1,5 @@
-#include "AOCRenderer.h"
-#include "Split.h"
+#include "AOCRenderer.hpp"
+#include "Split.hpp"
 
 #include <iostream>
 #include <vector>
@@ -37,7 +37,7 @@ void AOCRenderer::render(sf::RenderWindow& window)
 	window.display();
 }
 
-void AOCRenderer::writeText(string s)
+void AOCRenderer::print(string s)
 {
 	inputBufferMutex.lock();
 	inputBuffer.append(s);

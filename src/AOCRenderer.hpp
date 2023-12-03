@@ -30,7 +30,7 @@ public:
 	AOCRenderer();
 	void render(sf::RenderWindow& window);
 
-	void writeText(std::string s);
+	void print(std::string s);
 
 	void update(); 
 };

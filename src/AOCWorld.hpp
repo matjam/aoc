@@ -2,7 +2,7 @@
 
 #include <SFML/System.hpp>
 #include <SFML/Graphics.hpp>
-#include "AOCRenderer.h"
+#include "AOCRenderer.hpp"
 
 class AOCWorld
 {

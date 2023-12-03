@@ -1,7 +1,4 @@
-#pragma once
-
-#include <string>
-#include <vector>
+#include "Split.hpp"
 
 // for string delimiter
 std::vector<std::string> splitString(std::string s, std::string delimiter) {
@@ -18,3 +15,4 @@ std::vector<std::string> splitString(std::string s, std::string delimiter) {
     res.push_back(s.substr(pos_start));
     return res;
 }
+

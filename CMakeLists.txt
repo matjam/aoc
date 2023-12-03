@@ -10,10 +10,6 @@ if (POLICY CMP0141)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-include_directories(
-        ${PROJECT_SOURCE_DIR}/src
-)
-
 file(GLOB all_SRCS
         "src/*.h"
         "src/*.hpp"
@@ -29,6 +25,7 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
 # Add source to this project's executable.
 add_executable(aoc ${all_SRCS})
+target_include_directories(aoc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src")
 target_link_libraries(aoc PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-main)
 set_property(TARGET aoc PROPERTY CXX_STANDARD 20)
 

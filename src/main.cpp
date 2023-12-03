@@ -1,5 +1,5 @@
 #include <SFML/Graphics.hpp>
-#include "AOCWorld.h"
+#include "AOCWorld.hpp"
 
 int main()
 {
