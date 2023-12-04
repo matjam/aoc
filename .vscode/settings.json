@@ -1,0 +1,15 @@
+{
+    "files.associations": {
+        "CODEOWNERS": "plaintext",
+        "string": "cpp",
+        "xstring": "cpp",
+        "utility": "cpp",
+        "xtree": "cpp",
+        "ostream": "cpp",
+        "xlocale": "cpp",
+        "vector": "cpp"
+    },
+    "cmake.debugConfig": {
+        "cwd": "${workspaceRoot}"
+    }
+}

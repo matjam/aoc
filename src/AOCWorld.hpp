@@ -8,13 +8,13 @@ class AOCWorld
 {
 private:
 	sf::RenderWindow window;
-	AOCRenderer renderer;
 
 public:
+	static AOCRenderer *renderer;
+
 	AOCWorld();
 
 	int start();
-	void update(sf::Time& deltaTime);
+	void update(sf::Time &deltaTime);
 	void processEvents();
 };
-
