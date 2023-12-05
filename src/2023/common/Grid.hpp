@@ -11,7 +11,7 @@ private:
     int _height;
 
 public:
-    Grid();
+    Grid() {}
     Grid(int width, int height)
     {
         set_size(width, height);

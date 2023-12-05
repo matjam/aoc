@@ -21,14 +21,16 @@ Day3::Day3(AOCRenderer *r)
 
 void Day3::run()
 {
-    // string day3input = "resources/day3_input.txt";
+    string day3input = "resources/day3_input.txt";
     // string day3input = "resources/day3_test1_7253.txt";
     // string day3input = "resources/day3_test1_4361.txt";
-    string day3input = "resources/day3_chris.txt";
+    // string day3input = "resources/day3_test2_467835.txt";
+
     renderer->print("starting day3 ...\n");
     renderer->print(" . opening " + day3input + " ... ");
 
     load_buffer(day3input);
+    generate_parts();
 
     part1();
     part2();
@@ -76,22 +78,32 @@ void Day3::load_buffer(std::string filename)
     buffer_height = y + 1;
 }
 
-struct part
+void Day3::dump_buffer()
 {
-    int instance_id;
-    int value;
-};
+    ofstream dump;
+    dump.open("resources/buffer_dump.txt");
 
-void Day3::part1()
+    for (int y = 0; y < buffer_height; y++)
+    {
+        for (int x = 0; x < buffer_width; x++)
+        {
+            dump << buffer[x + y * buffer_width];
+        }
+        dump << endl;
+    }
+
+    dump.close();
+}
+
+void Day3::generate_parts()
 {
-    renderer->print(" . processing part 1 ... \n");
-    Grid<struct part> partGrid(buffer_width, buffer_height);
+    part_grid.set_size(buffer_width, buffer_height);
+
     string partNumber;
     int instance_x = 0; // x,y when we found an instance of a number
     int instance_y = 0;
     int instance_id = 1; // unique ID for each part so if there's 100*100 thats going to compute to 200, not 100.
                          // start at 1 so we know 0 isn't a thing.
-    vector<part> parts;  // an index of part isntance_id to part data.
 
     // find all the part numbers. while reading everything into the . I think this logic is ok.
     for (int y = 0; y < buffer_height; y++)
@@ -126,7 +138,7 @@ void Day3::part1()
 
                     for (auto px = instance_x; px < instance_x + partNumber.size(); px++)
                     {
-                        partGrid.set(px, instance_y, p);
+                        part_grid.set(px, instance_y, p);
                     }
                     // reset partNumber
                     partNumber.clear();
@@ -143,7 +155,7 @@ void Day3::part1()
 
             for (auto px = instance_x; px < instance_x + partNumber.size(); px++)
             {
-                partGrid.set(px, instance_y, p);
+                part_grid.set(px, instance_y, p);
             }
             // reset partNumber
             partNumber.clear();
@@ -151,6 +163,11 @@ void Day3::part1()
             instance_y = 0;
         }
     }
+}
+
+void Day3::part1()
+{
+    renderer->print(" . processing part 1 ... \n");
 
     int partSum = 0;
 
@@ -170,10 +187,10 @@ void Day3::part1()
                 continue;
             }
 
-            if ((c > ' ' && c < '0') || (c == '=')) // we excuded '.' above
+            if ((c > ' ' && c < '0') || c == '=' || c == '@') // we excuded '.' above
             {
-                cout << "considering " << x << "," << y << " symbol " << c << endl;
-                auto neighbours = partGrid.neighbours(x, y);
+                // cout << "considering " << x << "," << y << " symbol " << c << endl;
+                auto neighbours = part_grid.neighbours(x, y);
                 // found a symbol, check neighbours
                 for (auto p : neighbours)
                 { // fuck just remembed about foreach lol
@@ -182,10 +199,15 @@ void Day3::part1()
                         if (!instances.contains(p.instance_id))
                         {
                             instances[p.instance_id] = p;
-                            cout << "   added value " << p.value << endl;
+                            // cout << "   added value " << p.value << endl;
                         }
                     }
                 }
+            }
+            else
+            {
+                if (c < '0' || c > '9')
+                    cout << "unprocessed character [" << c << "]" << endl;
             }
         }
     }
@@ -203,4 +225,74 @@ void Day3::part1()
 // wow much copy pasta
 void Day3::part2()
 {
+    renderer->print(" . processing part 2 ... \n");
+
+    int partSum = 0;
+
+    // the computed gear ratio for each symbol
+    vector<int> ratios;
+
+    // now scan all the data for symbols that are not a number or .
+    // and then check neighbours for part numbers. We want only to
+    // consider each neighbour's unique
+    for (int y = 0; y < buffer_height; y++)
+    {
+        for (int x = 0; x < buffer_width; x++)
+        {
+            char c = buffer[x + y * buffer_width];
+            if (c == '.')
+            {
+                continue;
+            }
+
+            if ((c > ' ' && c < '0') || c == '=' || c == '@') // we excuded '.' above
+            {
+                auto neighbours = part_grid.neighbours(x, y);
+                // found a symbol, check neighbours
+
+                map<int, part> unique_parts;
+
+                for (auto p : neighbours)
+                { // fuck just remembed about foreach lol
+                    if (p.instance_id > 0)
+                    {
+                        if (!unique_parts.contains(p.instance_id))
+                        {
+                            unique_parts[p.instance_id] = p;
+                        }
+                    }
+                }
+
+                if (unique_parts.size() == 2)
+                {
+                    // compute the product of these parts
+                    int product = 1;
+                    for (auto p : unique_parts)
+                    {
+                        product = product * p.second.value;
+                    }
+
+                    ratios.push_back(product);
+                }
+                else
+                {
+                    cout << "did not compute for a part with more than two part numbers" << endl;
+                }
+            }
+            else
+            {
+                if (c < '0' || c > '9')
+                    cout << "unprocessed character [" << c << "]" << endl;
+            }
+        }
+    }
+
+    // add them into the sum if we found any
+    for (auto ratio : ratios)
+    {
+        partSum += ratio;
+    }
+    cout << "result: " << partSum << endl;
+
+    renderer->print(" . day3 part2 result: " + to_string(partSum) + "\n");
 }
