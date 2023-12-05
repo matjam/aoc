@@ -56,7 +56,9 @@
         "xlocbuf": "cpp",
         "xlocinfo": "cpp",
         "xmemory": "cpp",
-        "xtr1common": "cpp"
+        "xtr1common": "cpp",
+        "regex": "cpp",
+        "deque": "cpp"
     },
     "cmake.debugConfig": {
         "cwd": "${workspaceRoot}"

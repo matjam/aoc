@@ -18,6 +18,8 @@ file(GLOB all_SRCS
   "src/2023/day2/*.hpp"
   "src/2023/day3/*.cpp"
   "src/2023/day3/*.hpp"
+  "src/2023/day4/*.cpp"
+  "src/2023/day4/*.hpp"
 )
 
 project("aoc")
