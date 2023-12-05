@@ -22,8 +22,9 @@ Day3::Day3(AOCRenderer *r)
 void Day3::run()
 {
     // string day3input = "resources/day3_input.txt";
-    string day3input = "resources/day3_test1_7253.txt";
-
+    // string day3input = "resources/day3_test1_7253.txt";
+    // string day3input = "resources/day3_test1_4361.txt";
+    string day3input = "resources/day3_chris.txt";
     renderer->print("starting day3 ...\n");
     renderer->print(" . opening " + day3input + " ... ");
 
@@ -54,7 +55,7 @@ void Day3::load_buffer(std::string filename)
     char c;
     while (input.get(c))
     {
-        if (c == 13) // skip CR
+        if (c == 13 || c == 32) // skip CR
             continue;
 
         if (c == 10) // LF is a new line
@@ -72,7 +73,7 @@ void Day3::load_buffer(std::string filename)
         x++;
     }
 
-    buffer_height = y;
+    buffer_height = y + 1;
 }
 
 struct part
@@ -86,6 +87,8 @@ void Day3::part1()
     renderer->print(" . processing part 1 ... \n");
     Grid<struct part> partGrid(buffer_width, buffer_height);
     string partNumber;
+    int instance_x = 0; // x,y when we found an instance of a number
+    int instance_y = 0;
     int instance_id = 1; // unique ID for each part so if there's 100*100 thats going to compute to 200, not 100.
                          // start at 1 so we know 0 isn't a thing.
     vector<part> parts;  // an index of part isntance_id to part data.
@@ -105,6 +108,8 @@ void Day3::part1()
                 }
                 else
                 {
+                    instance_x = x;
+                    instance_y = y;
                     partNumber = string() + c;
                 }
             }
@@ -119,14 +124,31 @@ void Day3::part1()
                     parts.push_back(p);
                     instance_id++;
 
-                    for (auto i = partNumber.size(); i > 0; i--)
+                    for (auto px = instance_x; px < instance_x + partNumber.size(); px++)
                     {
-                        partGrid.set(x - (int)i, y, p);
+                        partGrid.set(px, instance_y, p);
                     }
                     // reset partNumber
                     partNumber.clear();
+                    instance_x = 0;
+                    instance_y = 0;
                 }
             }
+        }
+        if (partNumber.size() > 0)
+        {
+            part p = {instance_id, atoi(partNumber.c_str())};
+            parts.push_back(p);
+            instance_id++;
+
+            for (auto px = instance_x; px < instance_x + partNumber.size(); px++)
+            {
+                partGrid.set(px, instance_y, p);
+            }
+            // reset partNumber
+            partNumber.clear();
+            instance_x = 0;
+            instance_y = 0;
         }
     }
 
@@ -150,14 +172,18 @@ void Day3::part1()
 
             if ((c > ' ' && c < '0') || (c == '=')) // we excuded '.' above
             {
+                cout << "considering " << x << "," << y << " symbol " << c << endl;
                 auto neighbours = partGrid.neighbours(x, y);
                 // found a symbol, check neighbours
                 for (auto p : neighbours)
                 { // fuck just remembed about foreach lol
                     if (p.instance_id > 0)
                     {
-                        instances[p.instance_id] = p;
-                        cout << "at " << x << "," << y << " symbol " << c << " added value " << p.value << endl;
+                        if (!instances.contains(p.instance_id))
+                        {
+                            instances[p.instance_id] = p;
+                            cout << "   added value " << p.value << endl;
+                        }
                     }
                 }
             }
@@ -169,6 +195,7 @@ void Day3::part1()
     {
         partSum += part_kv.second.value;
     }
+    cout << "result: " << partSum << endl;
 
     renderer->print(" . day3 part1 result: " + to_string(partSum) + "\n");
 }
