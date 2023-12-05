@@ -7,9 +7,20 @@
         "xtree": "cpp",
         "ostream": "cpp",
         "xlocale": "cpp",
-        "vector": "cpp"
+        "vector": "cpp",
+        "format": "cpp",
+        "istream": "cpp",
+        "memory": "cpp",
+        "tuple": "cpp",
+        "type_traits": "cpp",
+        "xlocmes": "cpp",
+        "xlocmon": "cpp",
+        "xlocnum": "cpp",
+        "xloctime": "cpp",
+        "xutility": "cpp"
     },
     "cmake.debugConfig": {
         "cwd": "${workspaceRoot}"
-    }
+    },
+    "debug.console.collapseIdenticalLines": false
 }

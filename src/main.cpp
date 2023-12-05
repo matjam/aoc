@@ -16,7 +16,7 @@ int main()
     sf::Thread thread(&worldWorker);
     thread.launch();
 
-    sf::sleep(sf::seconds(5));
+    sf::sleep(sf::seconds(1));
 
     Day2 day2(AOCWorld::renderer);
     day2.run();

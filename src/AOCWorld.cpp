@@ -22,7 +22,7 @@ AOCWorld::AOCWorld()
 
 int AOCWorld::start()
 {
-    sf::Time timePerFrame = sf::seconds(1.f / 30.f);
+    sf::Time timePerFrame = sf::seconds(1.f / 60.f);
     sf::Clock clock;
     sf::Time timeSinceLastUpdate = sf::Time::Zero;
 

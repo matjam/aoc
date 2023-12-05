@@ -15,15 +15,30 @@ const int maxRed = 12;
 Day3::Day3(AOCRenderer *r)
 {
     renderer = r;
+    buffer_width = 0;
+    buffer_height = 0;
 }
 
 void Day3::run()
 {
-    string day3input = "resources/day3_input.txt";
+    // string day3input = "resources/day3_input.txt";
+    string day3input = "resources/day3_test1_7253.txt";
 
     renderer->print("starting day3 ...\n");
     renderer->print(" . opening " + day3input + " ... ");
-    input.open(day3input);
+
+    load_buffer(day3input);
+
+    part1();
+    part2();
+
+    renderer->print(" . closing " + day3input + ".\n");
+    input.close();
+}
+
+void Day3::load_buffer(std::string filename)
+{
+    input.open(filename);
     if (input.bad() || input.eof())
     {
         renderer->print("\n !!! error opening file :-(\n");
@@ -32,37 +47,58 @@ void Day3::run()
     renderer->print("opened!\n");
     renderer->print(" . loading into memory\n");
 
-    string line;
-    while (getline(input, line))
+    int x = 0;
+    int y = 0;
+    int height = 0;
+
+    char c;
+    while (input.get(c))
     {
-        buffer.push_back(line);
+        if (c == 13) // skip CR
+            continue;
+
+        if (c == 10) // LF is a new line
+        {
+            if (buffer_width == 0) // the first line we process sets the width of the buffer.
+            {
+                buffer_width = x;
+            }
+            x = 0;
+            y++;
+            continue;
+        }
+
+        buffer.push_back(c);
+        x++;
     }
 
-    part1();
-    part2();
-
-    renderer->print(" . closing " + day3input + ".");
-    input.close();
+    buffer_height = y;
 }
+
+struct part
+{
+    int instance_id;
+    int value;
+};
 
 void Day3::part1()
 {
     renderer->print(" . processing part 1 ... \n");
-    int row = 140;
-    int col = 140;
-    vector<int> grid;
-    grid.resize(row * col);
+    Grid<struct part> partGrid(buffer_width, buffer_height);
+    string partNumber;
+    int instance_id = 1; // unique ID for each part so if there's 100*100 thats going to compute to 200, not 100.
+                         // start at 1 so we know 0 isn't a thing.
+    vector<part> parts;  // an index of part isntance_id to part data.
 
-    // find all the part numbers
-    for (int y = 0; y < buffer.size(); y++)
+    // find all the part numbers. while reading everything into the . I think this logic is ok.
+    for (int y = 0; y < buffer_height; y++)
     {
-        string partNumber;
-        string line = buffer[y];
-        for (int x = 0; x < line.length(); x++)
+        for (int x = 0; x < buffer_width; x++)
         {
-            char c = line[x];
-            if (c > 47 && c < 58)
+            char c = buffer[x + y * buffer_width];
+            if (c > 47 && c < 58) // only digits
             {
+                // keep appending digits until we get something else
                 if (partNumber.size() > 0)
                 {
                     partNumber.append(string() + c);
@@ -76,10 +112,16 @@ void Day3::part1()
             {
                 if (partNumber.size() > 0)
                 {
-                    // store the number in all the locations it is related to
-                    for (int i = 0; i < partNumber.size(); i++)
+                    // this idiocy is basically so I can have two numbers that are the same value but
+                    // I can determine if they are the same instance of that number. I could use pointers
+                    // but .. whatever.
+                    part p = {instance_id, atoi(partNumber.c_str())};
+                    parts.push_back(p);
+                    instance_id++;
+
+                    for (auto i = partNumber.size(); i > 0; i--)
                     {
-                        grid[x - i + y * row] = atoi(partNumber.c_str());
+                        partGrid.set(x - (int)i, y, p);
                     }
                     // reset partNumber
                     partNumber.clear();
@@ -88,54 +130,44 @@ void Day3::part1()
         }
     }
 
-    // easy way to express all the neighbors in 2d space.
-    vector<pair<int, int>> neighbours = {
-        {-1, -1},
-        {0, -1},
-        {1, -1},
-        {-1, 0},
-        {1, 0},
-        {-1, 1},
-        {0, 1},
-        {1, 1},
-    };
-
     int partSum = 0;
 
-    // now scan all the data for symbols that are not a number or .
-    // and then check neighbours for part numbers.
-    for (int y = 0; y < buffer.size(); y++)
-    {
-        string line = buffer[y];
-        for (int x = 0; x < line.length(); x++)
-        {
-            vector<int> counted;
-            char c = line[x];
-            if ((c > 32 && c < 46) || c == 47 || (c > 57 && c < 65))
-            {
-                // found a symbol, check neighbours
-                for (auto neighbourVector : neighbours)
-                { // fuck just remembed about foreach lol
-                    int nx = x + neighbourVector.first;
-                    int ny = y + neighbourVector.second;
+    // instance IDs that we have seen in the neighbors.
+    map<int, part> instances;
 
-                    int part = grid[nx + ny * row];
-                    if (part != 0)
+    // now scan all the data for symbols that are not a number or .
+    // and then check neighbours for part numbers. We want only to
+    // consider each neighbour's unique
+    for (int y = 0; y < buffer_height; y++)
+    {
+        for (int x = 0; x < buffer_width; x++)
+        {
+            char c = buffer[x + y * buffer_width];
+            if (c == '.')
+            {
+                continue;
+            }
+
+            if ((c > ' ' && c < '0') || (c == '=')) // we excuded '.' above
+            {
+                auto neighbours = partGrid.neighbours(x, y);
+                // found a symbol, check neighbours
+                for (auto p : neighbours)
+                { // fuck just remembed about foreach lol
+                    if (p.instance_id > 0)
                     {
-                        if (counted.size() == 0 || counted.back() != part)
-                        {
-                            counted.push_back(part);
-                        }
+                        instances[p.instance_id] = p;
+                        cout << "at " << x << "," << y << " symbol " << c << " added value " << p.value << endl;
                     }
                 }
             }
-
-            // add them into the sum if we found any
-            for (auto part : counted)
-            {
-                partSum += part;
-            }
         }
+    }
+
+    // add them into the sum if we found any
+    for (auto part_kv : instances)
+    {
+        partSum += part_kv.second.value;
     }
 
     renderer->print(" . day3 part1 result: " + to_string(partSum) + "\n");
