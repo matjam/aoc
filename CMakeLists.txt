@@ -30,7 +30,7 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 # Add source to this project's executable.
 add_executable(aoc ${all_SRCS})
 target_include_directories(aoc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src" "${CMAKE_CURRENT_LIST_DIR}/src/2023/common")
-target_link_libraries(aoc PRIVATE sfml-system sfml-network sfml-graphics sfml-window sfml-main)
+target_link_libraries(aoc PRIVATE sfml-system sfml-network sfml-graphics sfml-window)
 set_property(TARGET aoc PROPERTY CXX_STANDARD 23)
 
 # TODO: Add tests and install targets if needed.

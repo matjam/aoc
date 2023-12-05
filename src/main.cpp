@@ -6,17 +6,8 @@
 #include "2023/day3/Day3.hpp"
 #include "2023/day4/Day4.hpp"
 
-void worldWorker()
+void aocWorker()
 {
-    AOCWorld world;
-    world.start();
-}
-
-int main()
-{
-    sf::Thread thread(&worldWorker);
-    thread.launch();
-
     sf::sleep(sf::seconds(1));
 
     // Day2 day2(AOCWorld::renderer);
@@ -27,6 +18,14 @@ int main()
 
     Day4 day4(AOCWorld::renderer);
     day4.run();
+}
 
+int main()
+{
+    AOCWorld world;
+    sf::Thread thread(&aocWorker);
+
+    thread.launch();
+    world.start();
     thread.wait();
 }
