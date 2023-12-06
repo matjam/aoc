@@ -17,10 +17,13 @@ void aocWorker()
 
 int main()
 {
-    AOCWorld world;
-    sf::Thread thread(&aocWorker);
+    // AOCWorld world;
+    // sf::Thread thread(&aocWorker);
 
-    thread.launch();
-    world.start();
-    thread.wait();
+    Day5 day5(nullptr);
+    day5.run();
+
+    // thread.launch();
+    // world.start();
+    // thread.wait();
 }

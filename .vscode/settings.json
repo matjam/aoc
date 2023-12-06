@@ -83,10 +83,13 @@
         "string_view": "cpp",
         "unordered_map": "cpp",
         "variant": "cpp",
-        "print": "cpp"
+        "print": "cpp",
+        "chrono": "cpp",
+        "forward_list": "cpp"
     },
     "cmake.debugConfig": {
-        "cwd": "${workspaceRoot}"
+        "cwd": "${workspaceRoot}",
+        "internalConsoleOptions": "openOnSessionStart",
     },
     "debug.console.collapseIdenticalLines": false
 }

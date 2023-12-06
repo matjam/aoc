@@ -8,6 +8,7 @@
 
 #include "AOCRenderer.hpp"
 
+// I reuse this for both the seed ranges and the mappings
 struct range
 {
     std::int64_t start;
@@ -22,16 +23,11 @@ private:
     std::ifstream input;
     std::vector<char> buffer;
 
-    // outer map is a map of keys like "seed-to-soil" to another map of <std::int64_t, std::int64_t>.
-    // the inner map is sorted (thanks to C++ maps being sorted) by key
-    // and the key is the start of the range. The value is the destination number,
-    // which will be offset from by the same amount the number being looked up is
-    // offset in the inner map.
-
     std::map<std::string, std::map<int64_t, range>> almanac;
     std::vector<std::int64_t> seeds;
-    std::vector<std::pair<std::int64_t, std::int64_t>> seed_ranges;
+    std::vector<range> seed_ranges;
     std::vector<std::string> almanac_maps;
+    std::vector<range> split_range(range mapping, range seed);
 
 public:
     Day5(AOCRenderer *r);
