@@ -10,16 +10,13 @@ if(POLICY CMP0141)
 endif()
 
 file(GLOB all_SRCS
+  "src/util/*.hpp"
   "src/*.h"
   "src/*.hpp"
   "src/*.cpp"
   "src/*.c"
-  "src/2023/day2/*.cpp"
-  "src/2023/day2/*.hpp"
-  "src/2023/day3/*.cpp"
-  "src/2023/day3/*.hpp"
-  "src/2023/day4/*.cpp"
-  "src/2023/day4/*.hpp"
+  "src/2023/*/*.cpp"
+  "src/2023/*/*.hpp"
 )
 
 project("aoc")
@@ -29,7 +26,7 @@ find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 
 # Add source to this project's executable.
 add_executable(aoc ${all_SRCS})
-target_include_directories(aoc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src" "${CMAKE_CURRENT_LIST_DIR}/src/2023/common")
+target_include_directories(aoc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src" "${CMAKE_CURRENT_LIST_DIR}/src/util")
 target_link_libraries(aoc PRIVATE sfml-system sfml-network sfml-graphics sfml-window)
 set_property(TARGET aoc PROPERTY CXX_STANDARD 23)
 
