@@ -82,7 +82,8 @@
         "sstream": "cpp",
         "string_view": "cpp",
         "unordered_map": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "print": "cpp"
     },
     "cmake.debugConfig": {
         "cwd": "${workspaceRoot}"

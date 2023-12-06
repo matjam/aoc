@@ -46,15 +46,3 @@ static inline std::string trim_copy(std::string s)
     trim(s);
     return s;
 }
-
-static inline std::vector<int> strvectoint(std::vector<std::string> sv)
-{
-    std::vector<int> result;
-
-    for (std::string s : sv)
-    {
-        result.push_back(atoi(s.c_str()));
-    }
-
-    return result;
-}
