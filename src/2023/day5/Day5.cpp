@@ -2,18 +2,14 @@
 #include "Split.hpp"
 #include "Trim.hpp"
 #include "Convert.hpp"
-#include <set>
-#include <chrono>
-#include <fstream>
-#include <iostream>
-#include <set>
-#include <sstream>
-#include <string>
+#include "Interval.hpp"
+
 #include <SFML/System.hpp>
 #include <algorithm>
+#include <fmt/core.h>
 
 #define DEBUG 1
-#define TEST_FILE 0
+#define TEST_FILE 1
 
 using namespace std;
 
@@ -33,7 +29,7 @@ void Day5::run()
 
     load_data(day5input);
 
-    // part2();
+    part1();
 }
 
 void Day5::load_data(string filename)
@@ -73,7 +69,7 @@ void Day5::load_data(string filename)
                 }
                 else
                 {
-                    seed_ranges.push_back({start, start + v - 1, -1});
+                    seed_ranges.push_back({start, start + v - 1});
                     start = -1;
                 }
             }
@@ -93,7 +89,8 @@ void Day5::load_data(string filename)
         // check that there's a map entry for this almanac entry
         if (!almanac.contains(map_name))
         {
-            almanac[map_name] = map<int64_t, range>();
+            almanac[map_name] = map<int64_t, Interval<int64_t>>();
+            almanac_dest[map_name] = map<int64_t, int64_t>();
         }
 
         // split the numbers
@@ -101,7 +98,54 @@ void Day5::load_data(string filename)
         auto numbers = string_vector_to_int64_vector(numbers_string);
 
         // store the range keyed by the start of the range.
-        almanac[map_name][numbers[1]] = {numbers[1], numbers[1] + numbers[2] - 1, numbers[0]};
+        almanac[map_name][numbers[1]] = {numbers[1], numbers[1] + numbers[2] - 1};
+
+        // destination is keyed by the start of the range.
+        almanac_dest[map_name][numbers[1]] = numbers[0];
+    }
+
+    // create an Interval for the beginning and end of each mapping that covers the entire range
+    // so that each mapping has Intervals that cover from 0 to INT64_MAX. I'm not sure this is
+    // necessary but it makes the code simpler.
+    for (auto [k, v] : almanac)
+    {
+        auto first = v.begin()->second;
+        auto last = v.rbegin()->second;
+
+        fmt::print("{}: {} {}\n", k, first.start, last.end);
+
+        if (first.start > 0)
+        {
+            v[0] = {0, first.start - 1};
+            almanac_dest[k][0] = 0;
+        }
+
+        if (last.end < INT64_MAX)
+        {
+            v[last.end + 1] = {last.end + 1, INT64_MAX};
+            almanac_dest[k][last.end + 1] = last.end + 1;
+        }
+    }
+
+    // check that none of the Intervals overlap
+    for (auto [k, v] : almanac)
+    {
+        for (auto [k2, v2] : v)
+        {
+            for (auto [k3, v3] : v)
+            {
+                if (k2 == k3)
+                    continue;
+
+                if (v2.overlaps(v3))
+                {
+                    cout << "overlap between " << k2 << " and " << k3 << endl;
+                    cout << "  " << v2.start << " " << v2.end << endl;
+                    cout << "  " << v3.start << " " << v3.end << endl;
+                    throw runtime_error("overlap");
+                }
+            }
+        }
     }
 
     input.close();
@@ -112,76 +156,32 @@ int64_t Day5::get_location_for_seed(int64_t id)
     for (auto map_name : almanac_maps)
     {
         auto map_name_split = split_string(map_name, "-");
-        // cout << map_name_split[0] << "[" << id << "] ";
+        cout << map_name_split[0] << "[" << id << "] ";
         id = from_almanac(map_name, id);
     }
 
-    // cout << "location [" << id << "]" << endl;
+    cout << "location [" << id << "]" << endl;
 
     return id;
 }
 
-int64_t Day5::from_almanac(string map_name, int64_t id)
+// from_almanac finds the interval a seed is in and then maps that seed value to the destination
+// value for that interval. It then returns the destination value.
+int64_t Day5::from_almanac(string map_name, int64_t seed)
 {
-    bool found = false;
-    range prev = {-1, -1, -1};
+    auto map = almanac[map_name];
+    auto dest = almanac_dest[map_name];
 
-    // iterate through the map, if the id is between the previous key
-    // and the current key, then calculate the offset of the previous
-    // and add it to the value in the map UNLESS previous was 0, then
-    // we just return the value directly.
-    //
-    // this handles the beginning of the range before the values source
-    // values start.
-    //
-    // if we hit the last entry and the value is after you know
+    // find the interval that contains the seed
+    auto interval = Interval<int64_t>::find_interval(seed, map);
 
-    if (DEBUG)
-        cout << "checking map " << map_name << " for id " << id << endl;
+    // the dest value is calculated by finding the offset from the start of the interval
+    // and adding that to the destination value for the interval
+    auto offset = seed - interval.start;
+    auto dest_value = dest[interval.start] + offset;
 
-    for (auto [k, range] : almanac[map_name])
-    {
-        if (DEBUG)
-            cout << " considering start " << range.start << " end " << range.end << " destination " << range.dest << " " << endl;
-
-        if (id < range.start)
-        {
-            // it may be the previous entry
-            if (prev.start == -1)
-            {
-                if (DEBUG)
-                    cout << " out of lower bounds, returning id " << id << " as the value" << endl;
-                // out of bounds just returns the provided value
-                return id;
-            }
-
-            // return the destination, offset by the result of the id minus
-            // prev_start.
-
-            if (DEBUG)
-                cout << " was previous entry, returning " << prev.dest + (id - prev.start) << endl;
-
-            return prev.dest + (id - prev.start); // avoiding overflows?
-        }
-
-        prev.start = range.start;
-        prev.end = range.end;
-        prev.dest = range.dest;
-    }
-
-    // was the previous entry
-    if (id >= prev.start && id <= prev.end)
-    {
-        if (DEBUG)
-            cout << " was previous entry, returning " << prev.dest + (id - prev.start) << endl;
-        return prev.dest + (id - prev.start);
-    }
-
-    if (DEBUG)
-        cout << " out of upper bounds, returning id " << id << " as the value" << endl;
-
-    // out of bounds just returns the provided value
-    return id;
+    // return the destination value
+    return dest_value;
 }
 
 void Day5::part1()

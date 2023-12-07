@@ -23,11 +23,12 @@ project("aoc")
 set(CMAKE_BUILD_TYPE Debug)
 
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
+find_package(fmt CONFIG REQUIRED)
 
 # Add source to this project's executable.
 add_executable(aoc ${all_SRCS})
 target_include_directories(aoc PRIVATE "${CMAKE_CURRENT_LIST_DIR}/src" "${CMAKE_CURRENT_LIST_DIR}/src/util")
-target_link_libraries(aoc PRIVATE sfml-system sfml-network sfml-graphics sfml-window)
+target_link_libraries(aoc PRIVATE sfml-system sfml-network sfml-graphics sfml-window fmt::fmt)
 set_property(TARGET aoc PROPERTY CXX_STANDARD 23)
 
 # TODO: Add tests and install targets if needed.

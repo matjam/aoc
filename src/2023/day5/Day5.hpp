@@ -7,14 +7,7 @@
 #include <cstdint>
 
 #include "AOCRenderer.hpp"
-
-// I reuse this for both the seed ranges and the mappings
-struct range
-{
-    std::int64_t start;
-    std::int64_t end;
-    std::int64_t dest;
-};
+#include "Interval.hpp"
 
 class Day5
 {
@@ -23,11 +16,11 @@ private:
     std::ifstream input;
     std::vector<char> buffer;
 
-    std::map<std::string, std::map<int64_t, range>> almanac;
+    std::map<std::string, std::map<std::int64_t, Interval<std::int64_t>>> almanac;
+    std::map<std::string, std::map<std::int64_t, std::int64_t>> almanac_dest;
     std::vector<std::int64_t> seeds;
-    std::vector<range> seed_ranges;
+    std::vector<Interval<int64_t>> seed_ranges;
     std::vector<std::string> almanac_maps;
-    std::vector<range> split_range(range mapping, range seed);
 
 public:
     Day5(AOCRenderer *r);
