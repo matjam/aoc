@@ -22,9 +22,25 @@ public:
         return value >= start && value <= end;
     }
 
-    bool overlaps(Interval<T> other)
+    // returns true if this interval contains the other interval
+    bool contains(Interval<T> other)
     {
-        return contains(other.start) || contains(other.end) || other.contains(start) || other.contains(end);
+        return other.start >= start && other.end <= end;
+    }
+
+    bool overlapped_at_start(Interval<T> other)
+    {
+        return other.start <= start && other.end >= start && other.end <= end;
+    }
+
+    bool overlapped_at_end(Interval<T> other)
+    {
+        return other.start >= start && other.start <= end && other.end >= end;
+    }
+
+    bool overlaps_completely(Interval<T> other)
+    {
+        return other.start <= start && other.end >= end;
     }
 
     bool operator==(const Interval<T> &other) const
@@ -32,22 +48,16 @@ public:
         return start == other.start && end == other.end;
     }
 
-    // if the intervals overlap, return all parts of the intervals that overlap
-    // if they don't overlap, return an empty vector
-    std::vector<Interval<T>> overlap(Interval<T> other)
+    // if the intervals overlap, return the part of the vector that overlaps.
+    Interval<T> overlap(Interval<T> other)
     {
         if (!overlaps(other))
-            return {};
+            return Interval<T>();
 
-        std::vector<Interval<T>> result;
+        T new_start = std::max(start, other.start);
+        T new_end = std::min(end, other.end);
 
-        if (contains(other.start))
-            result.push_back(Interval<T>(other.start, std::min(end, other.end)));
-
-        if (other.contains(start))
-            result.push_back(Interval<T>(start, std::min(end, other.end)));
-
-        return result;
+        return Interval<T>(new_start, new_end);
     }
 
     // Given a value and a map of intervals, return the interval that contains the value

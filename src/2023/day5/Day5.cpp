@@ -9,7 +9,7 @@
 #include <fmt/core.h>
 
 #define DEBUG 1
-#define TEST_FILE 0
+#define TEST_FILE 1
 
 using namespace std;
 using namespace fmt;
@@ -30,7 +30,7 @@ void Day5::run()
 
     load_data(day5input);
 
-    part1();
+    part2();
 }
 
 void Day5::load_data(string filename)
@@ -99,7 +99,7 @@ void Day5::load_data(string filename)
 
         // store the range keyed by the start of the range.
         almanac[map_name][numbers[1]] = {{numbers[1], numbers[1] + numbers[2] - 1}, numbers[0]};
-        print("stored {}: {}\n", map_name, almanac[map_name][numbers[1]]);
+        // print("stored {}: {}\n", map_name, almanac[map_name][numbers[1]]);
     }
 
     // create an Interval for the beginning and end of each mapping that covers the entire range
@@ -107,38 +107,38 @@ void Day5::load_data(string filename)
     // necessary but it makes the code simpler.
     for (auto &[k, v] : almanac)
     {
-        print("adding padding intervals for {}\n", k);
+        // print("adding padding intervals for {}\n", k);
 
         auto first = v.begin()->second;
         auto last = v.rbegin()->second;
 
-        print("  {}: first:{} last:{}\n", k, first, last);
+        // print("  {}: first:{} last:{}\n", k, first, last);
 
         if (first.interval.start > 0)
         {
             v[0] = {{0, first.interval.start - 1}, 0};
 
-            print("  added {}\n", v[0]);
+            // print("  added {}\n", v[0]);
         }
 
         if (last.interval.end < INT64_MAX)
         {
             v[last.interval.end + 1] = {{last.interval.end + 1, INT64_MAX}, last.interval.end + 1};
 
-            print("  added {}\n", v[last.interval.end + 1]);
+            // print("  added {}\n", v[last.interval.end + 1]);
         }
     }
 
-    print("dumping almanac:\n");
-    // dump the almanac
-    for (auto [k, v] : almanac)
-    {
-        print("  {}:\n", k);
-        for (auto [k2, v2] : v)
-        {
-            print("    {}\n", v2);
-        }
-    }
+    // print("dumping almanac:\n");
+    // // dump the almanac
+    // for (auto [k, v] : almanac)
+    // {
+    //     print("  {}:\n", k);
+    //     for (auto [k2, v2] : v)
+    //     {
+    //         print("    {}\n", v2);
+    //     }
+    // }
 
     input.close();
 }
@@ -204,38 +204,78 @@ void Day5::part2()
 
     sf::Clock clock;
 
-    // we start with the first range of seeds
-    auto range = seed_ranges[0];
+    vector<Interval<int64_t>> input_seeds;
+    vector<Interval<int64_t>> output_seeds;
 
-    // for each mapping
-    for (auto mapping : almanac_maps)
+    input_seeds = seed_ranges;
+    auto mapping_name = almanac_maps[0];
+
+    print("mapping {}\n", mapping_name);
+    auto mappings = almanac[mapping_name];
+    while (input_seeds.size() > 0)
     {
-        // create a new range of seeds
-        Interval<int64_t> new_range;
+        auto seed = input_seeds.back();
+        input_seeds.pop_back();
 
-        // for each seed range
-        for (auto seed_range : seed_ranges)
+        for (auto mapping : mappings)
         {
-            // if the seed range overlaps the current range
-            if (seed_range.overlaps(range))
+            // if the mapping is contained in the seed range, push the mapping's range
+            // into the new seeds vector
+            if (mapping.second.interval.contains(seed))
             {
-                // get the overlapping part of the seed range
-                auto overlap = seed_range.overlap(range);
+                print("  {} contains seed range {}\n", mapping.second, seed);
+                auto offset = mapping.second.destination + seed.start - mapping.second.interval.start;
+                Interval<int64_t> new_seed = {offset, offset + seed.end - seed.start}; // do I need a -1 here?
+                print("     mapped to seed range {}\n", new_seed);
+                print("      from_almanac({}, {})\n", from_almanac(mapping_name, seed.start), from_almanac(mapping_name, seed.end));
+            }
+            else if (mapping.second.interval.overlapped_at_start(seed))
+            {
+                print("  {} overlaps at start with seed range {}\n", mapping.second, seed);
+                // split seed in two
+                auto first = Interval<int64_t>(seed.start, mapping.second.interval.start - 1);
+                auto second = Interval<int64_t>(mapping.second.interval.start + mapping.second.destination, seed.end + mapping.second.destination);
 
-                // for each overlapping part
-                for (auto o : overlap)
-                {
-                    // push the overlapping part through the mapping
-                    auto result = from_almanac(mapping, o.start);
+                auto offset = mapping.second.interval.start + mapping.second.destination - seed.start;
+                Interval<int64_t> second_mapped = {offset, offset + seed.end - seed.start}; // do I need a -1 here?
 
-                    // add the result to the new range
-                    new_range = new_range + Interval<int64_t>(result, result + o.end - o.start);
-                }
+                print("    first: {}\n", first);
+                print("    second: {}\n", second);
+                print("    second mapped: {}\n", second_mapped);
+            }
+            else if (mapping.second.interval.overlapped_at_end(seed))
+            {
+                print("  {} overlaps at end with seed range {}\n", mapping.second, seed);
+                // split seed in two
+                auto offset = seed.start - mapping.second.interval.start;
+                auto first = Interval<int64_t>(seed.start + offset + mapping.second.destination,
+                                               mapping.second.interval.end + mapping.second.destination + offset);
+                auto second = Interval<int64_t>(mapping.second.interval.end + 1, seed.end);
+
+                print("    first: {}\n", first);
+                print("    second: {}\n", second);
+            }
+            else if (mapping.second.interval.overlaps_completely(seed))
+            {
+                print("  {} overlaps completely with seed range {}\n", mapping.second, seed);
+                // split seed in three
+                auto offset = mapping.second.interval.start - seed.start;
+                auto first = Interval<int64_t>(seed.start, mapping.second.interval.start - 1);
+                auto second = Interval<int64_t>(mapping.second.interval.start + mapping.second.destination + offset,
+                                                mapping.second.interval.end + mapping.second.destination + offset);
+                auto third = Interval<int64_t>(mapping.second.interval.end + 1, seed.end);
+
+                print("    first: {}\n", first);
+                print("    second: {}\n", second);
+                print("    third: {}\n", third);
+            }
+            else
+            {
+                print("  {} does not overlap with seed range {}\n", mapping.second, seed);
             }
         }
-
-        // the new range becomes the current range
-        range = new_range;
     }
 
+    sf::Time elapsed = clock.getElapsedTime();
+    // print("day 5 part 2 lowest location: {}\n", lowest);
 }
