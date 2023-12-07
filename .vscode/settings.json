@@ -103,7 +103,11 @@
         "thread": "cpp",
         "typeindex": "cpp",
         "unordered_set": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "filesystem": "cpp",
+        "functional": "cpp",
+        "stop_token": "cpp",
+        "xhash": "cpp"
     },
     "cmake.debugConfig": {
         "cwd": "${workspaceRoot}",

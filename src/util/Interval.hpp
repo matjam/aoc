@@ -67,14 +67,19 @@ public:
 template <class T>
 struct fmt::formatter<Interval<T>>
 {
-    constexpr auto parse(format_parse_context &ctx)
+    constexpr auto parse(format_parse_context &ctx) -> format_parse_context::iterator
     {
-        return ctx.begin();
+        // Parse the presentation format and store it in the formatter:
+        auto it = ctx.begin(), end = ctx.end();
+        if (it != end && *it != '}')
+            throw format_error("invalid format");
+        return it;
     }
-
-    template <typename FormatContext>
-    auto format(const Interval<T> &interval, FormatContext &ctx)
+    // Formats the point p using the parsed format specification (presentation)
+    // stored in this formatter.
+    auto format(const Interval<T> &t, format_context &ctx) const -> format_context::iterator
     {
-        return format_to(ctx.out(), "[{}, {}]", interval.start, interval.end);
+        // ctx.out() is an output iterator to write to.
+        return fmt::format_to(ctx.out(), "[{}, {}]", t.start, t.end);
     }
 };

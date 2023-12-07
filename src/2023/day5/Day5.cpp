@@ -9,9 +9,10 @@
 #include <fmt/core.h>
 
 #define DEBUG 1
-#define TEST_FILE 1
+#define TEST_FILE 0
 
 using namespace std;
+using namespace fmt;
 
 Day5::Day5(AOCRenderer *r)
 {
@@ -89,8 +90,7 @@ void Day5::load_data(string filename)
         // check that there's a map entry for this almanac entry
         if (!almanac.contains(map_name))
         {
-            almanac[map_name] = map<int64_t, Interval<int64_t>>();
-            almanac_dest[map_name] = map<int64_t, int64_t>();
+            almanac[map_name] = map<int64_t, almanac_entry>();
         }
 
         // split the numbers
@@ -98,53 +98,45 @@ void Day5::load_data(string filename)
         auto numbers = string_vector_to_int64_vector(numbers_string);
 
         // store the range keyed by the start of the range.
-        almanac[map_name][numbers[1]] = {numbers[1], numbers[1] + numbers[2] - 1};
-
-        // destination is keyed by the start of the range.
-        almanac_dest[map_name][numbers[1]] = numbers[0];
+        almanac[map_name][numbers[1]] = {{numbers[1], numbers[1] + numbers[2] - 1}, numbers[0]};
+        print("stored {}: {}\n", map_name, almanac[map_name][numbers[1]]);
     }
 
     // create an Interval for the beginning and end of each mapping that covers the entire range
     // so that each mapping has Intervals that cover from 0 to INT64_MAX. I'm not sure this is
     // necessary but it makes the code simpler.
-    for (auto [k, v] : almanac)
+    for (auto &[k, v] : almanac)
     {
+        print("adding padding intervals for {}\n", k);
+
         auto first = v.begin()->second;
         auto last = v.rbegin()->second;
 
-        fmt::print("{}: {} {}\n", k, first.start, last.end);
+        print("  {}: first:{} last:{}\n", k, first, last);
 
-        if (first.start > 0)
+        if (first.interval.start > 0)
         {
-            v[0] = {0, first.start - 1};
-            almanac_dest[k][0] = 0;
+            v[0] = {{0, first.interval.start - 1}, 0};
+
+            print("  added {}\n", v[0]);
         }
 
-        if (last.end < INT64_MAX)
+        if (last.interval.end < INT64_MAX)
         {
-            v[last.end + 1] = {last.end + 1, INT64_MAX};
-            almanac_dest[k][last.end + 1] = last.end + 1;
+            v[last.interval.end + 1] = {{last.interval.end + 1, INT64_MAX}, last.interval.end + 1};
+
+            print("  added {}\n", v[last.interval.end + 1]);
         }
     }
 
-    // check that none of the Intervals overlap
+    print("dumping almanac:\n");
+    // dump the almanac
     for (auto [k, v] : almanac)
     {
+        print("  {}:\n", k);
         for (auto [k2, v2] : v)
         {
-            for (auto [k3, v3] : v)
-            {
-                if (k2 == k3)
-                    continue;
-
-                if (v2.overlaps(v3))
-                {
-                    cout << "overlap between " << k2 << " and " << k3 << endl;
-                    cout << "  " << v2.start << " " << v2.end << endl;
-                    cout << "  " << v3.start << " " << v3.end << endl;
-                    throw runtime_error("overlap");
-                }
-            }
+            print("    {}\n", v2);
         }
     }
 
@@ -169,16 +161,15 @@ int64_t Day5::get_location_for_seed(int64_t id)
 // value for that interval. It then returns the destination value.
 int64_t Day5::from_almanac(string map_name, int64_t seed)
 {
-    auto map = almanac[map_name];
-    auto dest = almanac_dest[map_name];
+    auto mapping = almanac[map_name];
 
-    // find the interval that contains the seed
-    auto interval = Interval<int64_t>::find_interval(seed, map);
+    // find the entry that contains the seed
+    auto entry = find_entry_in_almanac(seed, mapping);
 
     // the dest value is calculated by finding the offset from the start of the interval
     // and adding that to the destination value for the interval
-    auto offset = seed - interval.start;
-    auto dest_value = dest[interval.start] + offset;
+    auto offset = seed - entry.interval.start;
+    auto dest_value = entry.destination + offset;
 
     // return the destination value
     return dest_value;
@@ -200,4 +191,51 @@ void Day5::part1()
 
     cout << "day 5 part 1 lowest location: " << lowest << endl;
     cout << "completed in " << elapsed.asMilliseconds() << "ms" << endl;
+}
+
+void Day5::part2()
+{
+    // OK so we should have what we need. In part2 of the problem, we're given a list of ranges
+    // of seed numbers. We need to walk each almanac mapping in order, and push the range of seeds
+    // through the mapping. This will create a new range of seeds. We then need to take the new
+    // range of seeds and push it through the next mapping. We keep doing this until we've gone
+    // through all the mappings. The final range of seeds holds the answer which is the lowest
+    // final number in all the ranges.
+
+    sf::Clock clock;
+
+    // we start with the first range of seeds
+    auto range = seed_ranges[0];
+
+    // for each mapping
+    for (auto mapping : almanac_maps)
+    {
+        // create a new range of seeds
+        Interval<int64_t> new_range;
+
+        // for each seed range
+        for (auto seed_range : seed_ranges)
+        {
+            // if the seed range overlaps the current range
+            if (seed_range.overlaps(range))
+            {
+                // get the overlapping part of the seed range
+                auto overlap = seed_range.overlap(range);
+
+                // for each overlapping part
+                for (auto o : overlap)
+                {
+                    // push the overlapping part through the mapping
+                    auto result = from_almanac(mapping, o.start);
+
+                    // add the result to the new range
+                    new_range = new_range + Interval<int64_t>(result, result + o.end - o.start);
+                }
+            }
+        }
+
+        // the new range becomes the current range
+        range = new_range;
+    }
+
 }
