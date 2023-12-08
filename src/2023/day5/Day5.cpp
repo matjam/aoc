@@ -212,23 +212,23 @@ void Day5::part2()
             // because we have a mapping that covers the complete range, we only need to consider
             // the seeds that overlap the mapping. If the seed doesn't overlap, we can ignore it
             // as it will be handled by the next mapping.
-            for (auto mapping : mappings)
+            for (auto &[start, mapping] : mappings)
             {
                 // get the overlap of the seed in the mapping. If it doesn't overlap, nothing happens.
-                auto overlap = mapping.second.interval.overlap(seed);
+                auto overlap = mapping.interval.overlap(seed);
                 if (overlap.start == -1)
                     continue;
 
-                print("    mapping: {}\n", mapping.second);
+                print("    mapping: {}\n", mapping);
 
                 // dump overlap
                 print("      overlap: {}\n", overlap);
 
                 // calculate the destination value for the seed
-                auto offset = overlap.start - mapping.second.interval.start;
+                auto offset = overlap.start - mapping.interval.start;
                 print("      offset: {}\n", offset);
 
-                auto dest_value = mapping.second.destination + offset;
+                auto dest_value = mapping.destination + offset;
                 Interval<int64_t> dest_seed = {dest_value, dest_value + overlap.length() - 1};
 
                 print("      dest seed: {}\n", dest_seed);
