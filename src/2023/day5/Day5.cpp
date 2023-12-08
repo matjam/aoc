@@ -7,7 +7,7 @@
 #include <algorithm>
 
 #define DEBUG 1
-#define TEST_FILE 0
+#define TEST_FILE 1
 
 using namespace std;
 using namespace fmt;
@@ -237,9 +237,6 @@ void Day5::part2()
                 output_seeds.push_back(dest_seed);
             }
         }
-
-        // dump the output seeds
-        dump_intervals("  output seeds", output_seeds, "    ");
 
         // swap the output seeds to the input seeds so we can process the next mapping
         input_seeds.clear();
