@@ -5,6 +5,7 @@
 #include <map>
 #include <deque>
 #include <cstdint>
+#include <fmt/core.h>
 
 #include "AOCRenderer.hpp"
 #include "Interval.hpp"
@@ -70,3 +71,12 @@ public:
     std::int64_t get_location_for_seed(std::int64_t id);
     std::int64_t from_almanac(std::string map_name, std::int64_t id);
 };
+
+static inline void dump_intervals(std::string name, std::vector<Interval<std::int64_t>> intervals, std::string indent = "  ")
+{
+    fmt::print("{}:\n", name);
+    for (auto interval : intervals)
+    {
+        fmt::print("{}{}\n", indent, interval);
+    }
+}

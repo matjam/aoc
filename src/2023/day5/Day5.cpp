@@ -1,15 +1,13 @@
 #include "Day5.hpp"
-#include "Split.hpp"
-#include "Trim.hpp"
 #include "Convert.hpp"
 #include "Interval.hpp"
+#include "strutil.h"
 
 #include <SFML/System.hpp>
 #include <algorithm>
-#include <fmt/core.h>
 
 #define DEBUG 1
-#define TEST_FILE 1
+#define TEST_FILE 0
 
 using namespace std;
 using namespace fmt;
@@ -58,7 +56,7 @@ void Day5::load_data(string filename)
             int64_t start = -1;
 
             auto seed_string = line.substr(7);
-            for (auto nstr : split_string(trim_copy(seed_string), " "))
+            for (auto nstr : strutil::split(strutil::trim_copy(seed_string), " "))
             {
                 auto v = stoll(nstr, nullptr);
                 seeds.push_back(v);
@@ -79,7 +77,7 @@ void Day5::load_data(string filename)
 
         if (line.find("map:") != string::npos)
         {
-            auto map_string = split_string(trim_copy(line), " ");
+            auto map_string = strutil::split(strutil::trim_copy(line), " ");
             map_name = map_string[0];
 
             // so we can process a number in order of maps
@@ -94,7 +92,7 @@ void Day5::load_data(string filename)
         }
 
         // split the numbers
-        auto numbers_string = split_string(line, " ");
+        auto numbers_string = strutil::split(line, " ");
         auto numbers = string_vector_to_int64_vector(numbers_string);
 
         // store the range keyed by the start of the range.
@@ -129,17 +127,6 @@ void Day5::load_data(string filename)
         }
     }
 
-    print("dumping almanac:\n");
-    // dump the almanac
-    for (auto [k, v] : almanac)
-    {
-        print("  {}:\n", k);
-        for (auto [k2, v2] : v)
-        {
-            print("    {}\n", v2);
-        }
-    }
-
     input.close();
 }
 
@@ -147,7 +134,7 @@ int64_t Day5::get_location_for_seed(int64_t id)
 {
     for (auto map_name : almanac_maps)
     {
-        auto map_name_split = split_string(map_name, "-");
+        auto map_name_split = strutil::split(map_name, "-");
         cout << map_name_split[0] << "[" << id << "] ";
         id = from_almanac(map_name, id);
     }
@@ -208,74 +195,66 @@ void Day5::part2()
     vector<Interval<int64_t>> output_seeds;
 
     input_seeds = seed_ranges;
-    auto mapping_name = almanac_maps[0];
-
-    print("mapping {}\n", mapping_name);
-    auto mappings = almanac[mapping_name];
-    while (input_seeds.size() > 0)
+    for (auto mapping_name : almanac_maps)
     {
-        auto seed = input_seeds.back();
-        input_seeds.pop_back();
+        print("mapping {}\n", mapping_name);
 
-        for (auto mapping : mappings)
+        // dump the input seeds
+        dump_intervals("  input seeds", input_seeds, "    ");
+
+        auto mappings = almanac[mapping_name];
+        while (input_seeds.size() > 0)
         {
-            // if the mapping is contained in the seed range, push the mapping's range
-            // into the new seeds vector
-            if (mapping.second.interval.contains(seed))
-            {
-                print("  {} contains seed range {}\n", mapping.second, seed);
-                auto offset = mapping.second.destination + seed.start - mapping.second.interval.start;
-                Interval<int64_t> new_seed = {offset, offset + seed.end - seed.start}; // do I need a -1 here?
-                print("     mapped to seed range {}\n", new_seed);
-                print("      from_almanac({}, {})\n", from_almanac(mapping_name, seed.start), from_almanac(mapping_name, seed.end));
-            }
-            else if (mapping.second.interval.overlapped_at_start(seed))
-            {
-                print("  {} overlaps at start with seed range {}\n", mapping.second, seed);
-                // split seed in two
-                auto first = Interval<int64_t>(seed.start, mapping.second.interval.start - 1);
-                auto second = Interval<int64_t>(mapping.second.interval.start + mapping.second.destination, seed.end + mapping.second.destination);
+            auto seed = input_seeds.back();
+            input_seeds.pop_back();
+            print("  seed: {}\n", seed);
 
-                auto offset = mapping.second.interval.start + mapping.second.destination - seed.start;
-                Interval<int64_t> second_mapped = {offset, offset + seed.end - seed.start}; // do I need a -1 here?
-
-                print("    first: {}\n", first);
-                print("    second: {}\n", second);
-                print("    second mapped: {}\n", second_mapped);
-            }
-            else if (mapping.second.interval.overlapped_at_end(seed))
+            // because we have a mapping that covers the complete range, we only need to consider
+            // the seeds that overlap the mapping. If the seed doesn't overlap, we can ignore it
+            // as it will be handled by the next mapping.
+            for (auto mapping : mappings)
             {
-                print("  {} overlaps at end with seed range {}\n", mapping.second, seed);
-                // split seed in two
-                auto offset = seed.start - mapping.second.interval.start;
-                auto first = Interval<int64_t>(seed.start + offset + mapping.second.destination,
-                                               mapping.second.interval.end + mapping.second.destination + offset);
-                auto second = Interval<int64_t>(mapping.second.interval.end + 1, seed.end);
+                print("    mapping: {}\n", mapping.second);
+                // get the overlap of the seed in the mapping. If it doesn't overlap, nothing happens.
+                auto overlap = mapping.second.interval.overlap(seed);
+                if (overlap.start == -1)
+                    continue;
 
-                print("    first: {}\n", first);
-                print("    second: {}\n", second);
-            }
-            else if (mapping.second.interval.overlaps_completely(seed))
-            {
-                print("  {} overlaps completely with seed range {}\n", mapping.second, seed);
-                // split seed in three
-                auto offset = mapping.second.interval.start - seed.start;
-                auto first = Interval<int64_t>(seed.start, mapping.second.interval.start - 1);
-                auto second = Interval<int64_t>(mapping.second.interval.start + mapping.second.destination + offset,
-                                                mapping.second.interval.end + mapping.second.destination + offset);
-                auto third = Interval<int64_t>(mapping.second.interval.end + 1, seed.end);
+                // dump overlap
+                print("      overlap: {}\n", overlap);
 
-                print("    first: {}\n", first);
-                print("    second: {}\n", second);
-                print("    third: {}\n", third);
-            }
-            else
-            {
-                print("  {} does not overlap with seed range {}\n", mapping.second, seed);
+                // calculate the destination value for the seed
+                auto offset = overlap.start - mapping.second.interval.start;
+                print("      offset: {}\n", offset);
+
+                auto dest_value = mapping.second.destination + offset;
+                Interval<int64_t> dest_seed = {dest_value, dest_value + overlap.length() - 1};
+
+                print("      dest seed: {}\n", dest_seed);
+
+                // add the destination value to the output seeds
+                output_seeds.push_back(dest_seed);
             }
         }
+
+        // dump the output seeds
+        dump_intervals("  output seeds", output_seeds, "    ");
+
+        // swap the output seeds to the input seeds so we can process the next mapping
+        input_seeds.clear();
+        input_seeds = output_seeds;
+        output_seeds.clear();
+    }
+
+    // find the lowest value in the output seeds
+    int64_t lowest = INT64_MAX;
+    for (auto seed : input_seeds)
+    {
+        if (seed.start < lowest)
+            lowest = seed.start;
     }
 
     sf::Time elapsed = clock.getElapsedTime();
-    // print("day 5 part 2 lowest location: {}\n", lowest);
+    print("day 5 part 2 lowest location: {}\n", lowest);
+    print("completed in {}ms\n", elapsed.asMilliseconds());
 }
