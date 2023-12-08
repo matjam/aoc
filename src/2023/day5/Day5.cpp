@@ -214,11 +214,12 @@ void Day5::part2()
             // as it will be handled by the next mapping.
             for (auto mapping : mappings)
             {
-                print("    mapping: {}\n", mapping.second);
                 // get the overlap of the seed in the mapping. If it doesn't overlap, nothing happens.
                 auto overlap = mapping.second.interval.overlap(seed);
                 if (overlap.start == -1)
                     continue;
+
+                print("    mapping: {}\n", mapping.second);
 
                 // dump overlap
                 print("      overlap: {}\n", overlap);
