@@ -129,16 +129,16 @@ void Day5::load_data(string filename)
         }
     }
 
-    // print("dumping almanac:\n");
-    // // dump the almanac
-    // for (auto [k, v] : almanac)
-    // {
-    //     print("  {}:\n", k);
-    //     for (auto [k2, v2] : v)
-    //     {
-    //         print("    {}\n", v2);
-    //     }
-    // }
+    print("dumping almanac:\n");
+    // dump the almanac
+    for (auto [k, v] : almanac)
+    {
+        print("  {}:\n", k);
+        for (auto [k2, v2] : v)
+        {
+            print("    {}\n", v2);
+        }
+    }
 
     input.close();
 }
