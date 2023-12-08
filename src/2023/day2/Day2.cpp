@@ -1,9 +1,9 @@
 #include <string>
 #include <charconv>
 
+#include "strutil.h"
+
 #include "Day2.hpp"
-#include "Split.hpp"
-#include "Trim.hpp"
 
 using namespace std;
 
@@ -56,7 +56,7 @@ void Day2::part1()
 
 		// Split the line like
 		// Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-		vector<string> gameLineData = split_string(line, ":");
+		vector<string> gameLineData = strutil::split(line, ":");
 		if (gameLineData.size() != 2)
 		{
 			renderer->print("error!\n ! expected at least at least one game entry in a game.\n");
@@ -67,7 +67,7 @@ void Day2::part1()
 
 		// Split the string like
 		// Game 1
-		vector<string> gameNumberStrings = split_string(gameLineData[0], " ");
+		vector<string> gameNumberStrings = strutil::split(gameLineData[0], " ");
 		if (gameNumberStrings.size() != 2)
 		{
 			renderer->print("error!\n ! expected a string like [Game 1].\n");
@@ -80,7 +80,7 @@ void Day2::part1()
 
 		// split "3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
 		// into 3 rounds
-		vector<string> rounds = split_string(gameLineData[1], ";");
+		vector<string> rounds = strutil::split(gameLineData[1], ";");
 		if (rounds.size() == 0)
 		{
 			renderer->print("error!\n ! expected at least one round in a game.\n");
@@ -98,7 +98,7 @@ void Day2::part1()
 
 			string round = rounds[r];
 
-			vector<string> cubeCounts = split_string(trim_copy(round), ",");
+			vector<string> cubeCounts = strutil::split(strutil::trim_copy(round), ",");
 			if (cubeCounts.size() < 1)
 			{
 				renderer->print("error!\n ! expected a string like [3 blue, 4 red].\n");
@@ -110,7 +110,7 @@ void Day2::part1()
 			// we should have a string in cubeCounts[c] that is like [5 green].
 			for (int c = 0; c < cubeCounts.size(); c++)
 			{
-				vector<string> colorValue = split_string(trim_copy(cubeCounts[c]), " ");
+				vector<string> colorValue = strutil::split(strutil::trim_copy(cubeCounts[c]), " ");
 				if (colorValue.size() != 2)
 				{
 					renderer->print("error!\n ! expected a string like [3 blue].\n");
@@ -177,7 +177,7 @@ void Day2::part2()
 
 		// Split the line like
 		// Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
-		vector<string> gameLineData = split_string(line, ":");
+		vector<string> gameLineData = strutil::split(line, ":");
 		if (gameLineData.size() != 2)
 		{
 			renderer->print("error!\n ! expected at least at least one game entry in a game.\n");
@@ -188,7 +188,7 @@ void Day2::part2()
 
 		// Split the string like
 		// Game 1
-		vector<string> gameNumberStrings = split_string(gameLineData[0], " ");
+		vector<string> gameNumberStrings = strutil::split(gameLineData[0], " ");
 		if (gameNumberStrings.size() != 2)
 		{
 			renderer->print("error!\n ! expected a string like [Game 1].\n");
@@ -201,7 +201,7 @@ void Day2::part2()
 
 		// split "3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green"
 		// into 3 rounds
-		vector<string> rounds = split_string(gameLineData[1], ";");
+		vector<string> rounds = strutil::split(gameLineData[1], ";");
 		if (rounds.size() == 0)
 		{
 			renderer->print("error!\n ! expected at least one round in a game.\n");
@@ -215,7 +215,7 @@ void Day2::part2()
 		{
 			string round = rounds[r];
 
-			vector<string> cubeCounts = split_string(trim_copy(round), ",");
+			vector<string> cubeCounts = strutil::split(strutil::trim_copy(round), ",");
 			if (cubeCounts.size() < 1)
 			{
 				renderer->print("error!\n ! expected a string like [3 blue, 4 red].\n");
@@ -227,7 +227,7 @@ void Day2::part2()
 			// we should have a string in cubeCounts[c] that is like [5 green].
 			for (int c = 0; c < cubeCounts.size(); c++)
 			{
-				vector<string> colorValue = split_string(trim_copy(cubeCounts[c]), " ");
+				vector<string> colorValue = strutil::split(strutil::trim_copy(cubeCounts[c]), " ");
 				if (colorValue.size() != 2)
 				{
 					renderer->print("error!\n ! expected a string like [3 blue].\n");

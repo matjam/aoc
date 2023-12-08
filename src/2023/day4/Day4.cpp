@@ -6,8 +6,8 @@
 #include <algorithm>
 
 #include "Day4.hpp"
-#include "Split.hpp"
 #include "Convert.hpp"
+#include "strutil.h"
 
 using namespace std;
 
@@ -74,8 +74,8 @@ ScratchCard Day4::parse_card(std::string line)
     auto winners_str = matches[3].str();
 
     regex replace_re("[\\s]+");
-    card.numbers = strvectoint(split_string(regex_replace(numbers_str, replace_re, " "), " "));
-    card.winners = strvectoint(split_string(regex_replace(winners_str, replace_re, " "), " "));
+    card.numbers = strvectoint(strutil::split(regex_replace(numbers_str, replace_re, " "), " "));
+    card.winners = strvectoint(strutil::split(regex_replace(winners_str, replace_re, " "), " "));
     card.id = atoi(card_id_str.c_str()) - 1; // cards start at 1 but we're going to use 0 based indexes
 
     return card;

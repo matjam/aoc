@@ -22,8 +22,20 @@ file(GLOB all_SRCS
 project("aoc")
 set(CMAKE_BUILD_TYPE Debug)
 
+# Boost settings
+set(Boost_USE_STATIC_LIBS ON) # only find static libs
+set(Boost_USE_DEBUG_LIBS OFF) # ignore debug libs and
+set(Boost_USE_RELEASE_LIBS ON) # only find release libs
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME ON) # link Boost Static libraries
+
 find_package(SFML COMPONENTS system window graphics CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
+find_package(Boost REQUIRED)
+
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+endif()
 
 # Add source to this project's executable.
 add_executable(aoc ${all_SRCS})

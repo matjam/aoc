@@ -48,11 +48,21 @@ public:
         return start == other.start && end == other.end;
     }
 
+    T length()
+    {
+        return end - start + 1;
+    }
+
+    bool overlaps(Interval<T> other)
+    {
+        return contains(other.start) || contains(other.end) || other.contains(start) || other.contains(end);
+    }
+
     // if the intervals overlap, return the part of the vector that overlaps.
     Interval<T> overlap(Interval<T> other)
     {
         if (!overlaps(other))
-            return Interval<T>();
+            return Interval<T>(-1, -1);
 
         T new_start = std::max(start, other.start);
         T new_end = std::min(end, other.end);
