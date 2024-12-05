@@ -42,10 +42,6 @@ func (s *Part2Solver) Solve() int {
 			enabled = false
 			continue
 		} else if enabled {
-			if len(match[1]) > 3 || len(match[2]) > 3 {
-				log.Infof("skipping long params: %v * %v", match[1], match[2])
-				continue
-			}
 			log.Debugf("calculating: %v * %v", match[1], match[2])
 			total += util.ToInt(match[1]) * util.ToInt(match[2])
 		} else {
