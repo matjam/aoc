@@ -26,6 +26,10 @@ func main() {
 		log.Error("😭 Couldn't load the .env file: %w", err)
 	}
 
+	if os.Getenv("DEBUG") != "" {
+		log.SetLevel(log.DebugLevel)
+	}
+
 	if len(os.Args) != 3 {
 		log.Fatal("🎄 Provide 2 numbers indicating which day and part you wish to solve for.")
 	}

@@ -37,10 +37,8 @@ func (s *Part2Solver) Solve() int {
 	for _, match := range matches {
 		if match[0] == "do()" {
 			enabled = true
-			continue
 		} else if match[0] == "don't()" {
 			enabled = false
-			continue
 		} else if enabled {
 			log.Debugf("calculating: %v * %v", match[1], match[2])
 			total += util.ToInt(match[1]) * util.ToInt(match[2])
