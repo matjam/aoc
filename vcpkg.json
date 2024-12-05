@@ -1,7 +1,0 @@
-{
-  "name": "aoc",
-  "version": "0.0.1",
-  "dependencies": ["sfml", "opengl", "fmt", "boost-icl", "boost-interval"],
-  "vcpkg-configuration": {},
-  "builtin-baseline": "16ee2ecb31788c336ace8bb14c21801efb6836e4"
-}
