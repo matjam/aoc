@@ -30,10 +30,11 @@ func (s *Part2Solver) Solve() int {
 	total := 0
 	enabled := true
 	re := regexp.MustCompile(`mul[(]([0-9]{1,3}),([0-9]{1,3})[)]|do[(][)]|don't[(][)]`)
+	matches := re.FindAllStringSubmatch(s.Input, -1)
 
-	log.Debugf("matches: %q", re.FindAllStringSubmatch(s.Input, -1))
+	log.Debugf("matches: %q", matches)
 
-	for _, match := range re.FindAllStringSubmatch(s.Input, -1) {
+	for _, match := range matches {
 		if match[0] == "do()" {
 			enabled = true
 			continue
