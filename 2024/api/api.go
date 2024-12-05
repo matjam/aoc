@@ -1,7 +1,6 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
@@ -15,20 +14,10 @@ import (
 var _cache map[int]string
 
 func GetInput(day int) (string, error) {
-	cache, err := os.ReadFile(".cache.json")
+	cachedData, err := os.ReadFile(fmt.Sprintf(".cache/%v.txt", day))
 	if err == nil {
-		log.Infof("✔️ .cache.json exists, checking if it contains data for day %v", day)
-		// load the data from the cache and see if the day we want is there
-		err := json.Unmarshal(cache, &_cache)
-		if err == nil {
-			if input, ok := _cache[day]; ok {
-				log.Infof("✔️ found input data for day %v", day)
-				return input, nil
-			}
-			log.Infof("❌ no input data for day %v", day)
-		} else {
-			log.Fatalf("❌ malformed cache file? consider deleting and retry: %v", err)
-		}
+		log.Infof("✔️ .cache.json exists, returning data for day %v", day)
+		return string(cachedData), nil
 	}
 
 	if _cache == nil {
@@ -41,18 +30,15 @@ func GetInput(day int) (string, error) {
 		SetCookie(&http.Cookie{Name: "session", Value: os.Getenv("AOC_SESSION")}).
 		Get(url)
 
-	body := resp.String()
-
-	log.Infof("✔️ retrieved puzzle input, %v bytes", len(body))
-
-	_cache[day] = body
-
-	cache, err = json.Marshal(_cache)
 	if err != nil {
-		log.Fatalf("❌ couldn't create cache json: %v", err.Error())
+		log.Fatalf("💣 failed to retrieve puzzle input: %v", err)
 	}
 
-	os.WriteFile(".cache.json", cache, 0644)
+	body := resp.String()
+	log.Infof("✔️ retrieved puzzle input, %v bytes", len(body))
+	_cache[day] = body
 
-	return _cache[day], nil
+	os.WriteFile(fmt.Sprintf(".cache/%v.txt", day), []byte(body), 0644)
+
+	return body, nil
 }

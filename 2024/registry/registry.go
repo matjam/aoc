@@ -22,7 +22,6 @@ func Register(day int, part int, solver Solver) {
 	}
 
 	solvers[key(day, part)] = solver
-	log.Infof("✨ registered solver for day %v part %v", day, part)
 }
 
 func GetSolver(day int, part int) Solver {
@@ -31,4 +30,10 @@ func GetSolver(day int, part int) Solver {
 
 func key(day int, part int) string {
 	return fmt.Sprintf("day %v part %v", day, part)
+}
+
+func LogSolvers() {
+	for k := range solvers {
+		log.Infof("✨ registered solver: %v", k)
+	}
 }

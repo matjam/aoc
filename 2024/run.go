@@ -10,6 +10,7 @@ import (
 
 	_ "github.com/matjam/aoc/2024/day1"
 	_ "github.com/matjam/aoc/2024/day2"
+	_ "github.com/matjam/aoc/2024/day3"
 )
 
 var CLI struct {
@@ -18,6 +19,8 @@ var CLI struct {
 
 func main() {
 	log.Info("🎄 Bootstrapping AOC 2024! 🎄")
+	registry.LogSolvers()
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Error("😭 Couldn't load the .env file: %w", err)
