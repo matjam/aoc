@@ -11,6 +11,8 @@ import (
 	_ "github.com/matjam/aoc/2024/day1"
 	_ "github.com/matjam/aoc/2024/day2"
 	_ "github.com/matjam/aoc/2024/day3"
+	_ "github.com/matjam/aoc/2024/day4"
+	_ "github.com/matjam/aoc/2024/day5"
 )
 
 var CLI struct {

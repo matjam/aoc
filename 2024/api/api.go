@@ -14,9 +14,10 @@ import (
 var _cache map[int]string
 
 func GetInput(day int) (string, error) {
-	cachedData, err := os.ReadFile(fmt.Sprintf(".cache/%v.txt", day))
+	cacheFileName := fmt.Sprintf(".cache/%v.txt", day)
+	cachedData, err := os.ReadFile(cacheFileName)
 	if err == nil {
-		log.Infof("✔️ .cache.json exists, returning data for day %v", day)
+		log.Infof("✔️ %v exists, returning data for day %v", cacheFileName, day)
 		return string(cachedData), nil
 	}
 
@@ -38,7 +39,7 @@ func GetInput(day int) (string, error) {
 	log.Infof("✔️ retrieved puzzle input, %v bytes", len(body))
 	_cache[day] = body
 
-	os.WriteFile(fmt.Sprintf(".cache/%v.txt", day), []byte(body), 0644)
+	os.WriteFile(cacheFileName, []byte(body), 0644)
 
 	return body, nil
 }

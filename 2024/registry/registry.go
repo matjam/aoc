@@ -34,6 +34,6 @@ func key(day int, part int) string {
 
 func LogSolvers() {
 	for k := range solvers {
-		log.Infof("✨ registered solver: %v", k)
+		log.Debugf("✨ registered solver: %v", k)
 	}
 }
