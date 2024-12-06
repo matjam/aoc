@@ -51,7 +51,7 @@ func TestPart1(t *testing.T) {
 func TestPart2(t *testing.T) {
 	log.SetLevel(log.DebugLevel)
 
-	expected := 9
+	expected := 123
 
 	solver := day5.Part2Solver{Input: input}
 	result := solver.Solve()

@@ -43,13 +43,19 @@ func Remove[T any](slice []T, s int) []T {
 	return append(slice[:s], slice[s+1:]...)
 }
 
-func Contains[T comparable](slice []T, v T) bool {
-	for _, s := range slice {
+func Contains[T comparable](slice []T, v T) (bool, int) {
+	for location, s := range slice {
 		if s == v {
-			return true
+			return true, location
 		}
 	}
-	return false
+	return false, -1
+}
+
+// check if entry exists in map
+func Exists[T comparable](m map[T]struct{}, key T) bool {
+	_, ok := m[key]
+	return ok
 }
 
 func SplitStringToIntArray(s string, sep string) []int {

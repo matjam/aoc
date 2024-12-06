@@ -45,8 +45,6 @@ func (s *Part1Solver) Solve() int {
 	log.Debugf("rules: %v", s.rules)
 
 	for scanner.Scan() {
-		bad := false
-		seen := make([]int, 0)
 		line := scanner.Text()
 		if line == "" {
 			break
@@ -55,26 +53,8 @@ func (s *Part1Solver) Solve() int {
 		if len(updates) == 0 {
 			log.Fatalf("💣 expected at least 1 part but got %v", len(updates))
 		}
-		log.Debugf("update: %v", updates)
 
-		for _, update := range updates {
-			rule := s.rules[update]
-			for _, r := range rule {
-				if util.Contains(seen, r) {
-					log.Debugf("         bad: %v was already seen", r)
-					bad = true
-					break
-				}
-			}
-
-			if bad {
-				break
-			}
-
-			seen = append(seen, update)
-		}
-
-		if !bad {
+		if IsValidUpdate(updates, s.rules) {
 			middleNumber := updates[len(updates)/2]
 			total += middleNumber
 		}
