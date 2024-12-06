@@ -14,6 +14,11 @@ import (
 var _cache map[int]string
 
 func GetInput(day int) (string, error) {
+	err := os.Mkdir(".cache", 0750)
+	if err != nil && !os.IsExist(err) {
+		log.Fatalf("💣 %v", err)
+	}
+
 	cacheFileName := fmt.Sprintf(".cache/%v.txt", day)
 	cachedData, err := os.ReadFile(cacheFileName)
 	if err == nil {

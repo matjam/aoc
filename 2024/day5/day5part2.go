@@ -94,11 +94,6 @@ func (s *Part2Solver) FixUpdates() []int {
 }
 
 func (s *Part2Solver) ReorderUpdate(update []int) []int {
-	for _, rule := range s.rules {
-		for i, r := range rule {
-			if r == update[0] {
-				log.Debugf("found rule for %v: %v", update[0], rule)
-				s.ReorderUpdate(update)
 
 	return nil
 }
