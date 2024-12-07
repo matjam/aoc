@@ -1,87 +1,131 @@
 package day6
 
+// My brain broke so I stole it https://github.com/miningape/advent_2024/blob/master/day06/problem2/solution.go
+//
+// I was on the right track, but the refactoring was too much for me to give a shit about.
+
 import (
+	"fmt"
+	"maps"
+	"strings"
+
 	"github.com/charmbracelet/log"
 	"github.com/matjam/aoc/2024/util"
 )
 
-type Location struct {
-	X, Y int
-}
-
 type Part2Solver struct {
 	Input string
-	Bot   *GridBot
 }
 
 func (s *Part2Solver) Run() {
-	s.Input = util.GetInput(6, 2)
+	s.Input = util.GetInput(6, 1)
 	log.Infof("🎄 day 6 part 1 result: %v", s.Solve())
 }
 
 func (s *Part2Solver) Solve() int {
-	// First find all the places the bot will visit unrestrained.
+	lines := strings.Split(s.Input, "\n")
 
-	grid := NewGridFromString(s.Input)
-	locations := make([]Location, 0)
-	loopLocations := make([]Location, 0)
-	s.CheckLoop(grid) // we know this won't loop the first time, but we need to find the locations it visits
+	position, direction := findStartingPostion(lines)
+	obstacles := walkUntilLeaves(lines, position, direction)
 
-	for y, row := range grid.Cells {
-		for x, v := range row {
-			if v == 'X' {
-				locations = append(locations, Location{X: x, Y: y})
+	return len(obstacles)
+}
+
+type moment struct {
+	position  util.Vector
+	direction util.Vector
+}
+
+func findStartingPostion(lines []string) (util.Vector, util.Vector) {
+	for y, line := range lines {
+		for x, c := range line {
+			if c == '^' {
+				return util.Vector{X: x, Y: y}, util.Vector{X: 0, Y: -1}
 			}
 		}
 	}
 
-	log.Debugf("🤖 Visited %v locations not including the start", len(locations))
-
-	// put an obstacle in each of the locations the bot visited, running
-	// the bot each time to see if it hits an obstacle (loops)
-
-	for i, loc := range locations {
-		grid := NewGridFromString(s.Input) // seems expensive
-		grid.Set(loc.X, loc.Y, 'O')
-		if s.CheckLoop(grid) {
-			loopLocations = append(loopLocations, loc)
-			log.Infof("🤖 %v/%v Looping at %v", i, len(locations), loc)
-		} else {
-			log.Infof("🤖 %v/%v Didn't loop at %v", i, len(locations), loc)
-		}
-	}
-
-	log.Infof("🤖 Found %v loop locations", len(loopLocations))
-
-	return len(loopLocations)
+	panic("Could not find \"^\" (starting position) in map.")
 }
 
-func (s *Part2Solver) CheckLoop(grid *Grid) bool {
-	hitObstacle := false
+func isInside(lines []string, position util.Vector) bool {
+	if position.Y < 0 || position.Y > len(lines)-1 {
+		return false
+	}
 
-	bot := NewGridBot(0, 0, North, grid)
+	if position.X < 0 || position.X > len(lines[position.Y])-1 {
+		return false
+	}
 
-	// Runs the bot and returns a list of all the locations it visited
-	bot.X, bot.Y = grid.Find('^')
-	bot.D = North
-	bot.hitObstacle = false
+	return true
+}
 
-	for {
-		log.Debugf("🤖 %v %v %v\n%v", bot.X, bot.Y, bot.D, grid)
+func nextPosition(lines []string, position util.Vector, direction util.Vector) (util.Vector, util.Vector) {
+	next := position.Add(direction)
 
-		// move forward unless you hit a wall or obstacle, or walk off the grid
-		bot.Forward()
+	if isInside(lines, next) && rune(lines[next.Y][next.X]) == '#' {
+		return position, direction.RotateOrigin90().Opposite()
+	}
 
-		if bot.OutOfBounds() {
-			return false
-		}
+	return next, direction
+}
 
-		if bot.HitObstacle() && hitObstacle {
+func nextPositionWithObstacle(lines []string, position util.Vector, direction util.Vector, obstacle util.Vector) (util.Vector, util.Vector) {
+	next := position.Add(direction)
+
+	if isInside(lines, next) && (next == obstacle || rune(lines[next.Y][next.X]) == '#') {
+		return position, direction.RotateOrigin90().Opposite()
+	}
+
+	return next, direction
+}
+
+func isLoop(lines []string, path util.Set[moment], position util.Vector, direction util.Vector, obstacle util.Vector) bool {
+	seen := maps.Clone(path)
+
+	for isInside(lines, position) {
+		current := moment{position, direction}
+		if seen.Contains(current) {
 			return true
 		}
 
-		if bot.HitObstacle() {
-			hitObstacle = true
+		seen.Add(current)
+		position, direction = nextPositionWithObstacle(lines, position, direction, obstacle)
+	}
+
+	return false
+}
+
+func walkUntilLeaves(lines []string, position util.Vector, direction util.Vector) util.Set[util.Vector] {
+	path := util.SetOf[moment]()
+	stepped_on := util.SetOf[util.Vector]()
+	loopObstacles := util.SetOf[util.Vector]()
+
+	for isInside(lines, position) {
+		path.Add(moment{position, direction})
+		stepped_on.Add(position)
+
+		in_front := position.Add(direction)
+		if !stepped_on.Contains(in_front) && isLoop(lines, path, position, direction.RotateOrigin90().Opposite(), in_front) {
+			loopObstacles.Add(in_front)
 		}
+
+		position, direction = nextPosition(lines, position, direction)
+	}
+
+	return loopObstacles
+}
+
+func writeOutput(lines []string, obstacles util.Set[util.Vector]) {
+	for y, line := range lines {
+		for x, c := range line {
+			if obstacles.Contains(util.Vector{X: x, Y: y}) {
+				fmt.Print("O")
+			} else {
+				fmt.Print(string(c))
+			}
+		}
+
+		fmt.Print("\n")
 	}
 }

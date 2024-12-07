@@ -31,6 +31,14 @@ func ToInt(v string) int {
 	return i
 }
 
+func ToInts(vs []string) []int {
+	ints := make([]int, len(vs))
+	for i, v := range vs {
+		ints[i] = ToInt(v)
+	}
+	return ints
+}
+
 func IntDistance(a, b int) int {
 	if a > b {
 		return a - b

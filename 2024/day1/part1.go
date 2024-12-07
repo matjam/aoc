@@ -31,6 +31,10 @@ func (s Part1Solver) Run() {
 	log.Infof("🎄 day 1 part 1 result: %v", totalDistance)
 }
 
+func (s Part1Solver) Update() {
+
+}
+
 func (s Part1Solver) Solve(input string) int {
 	list1 := make([]int, 0)
 	list2 := make([]int, 0)

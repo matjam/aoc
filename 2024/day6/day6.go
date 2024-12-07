@@ -67,6 +67,18 @@ func NewGridFromString(s string) *Grid {
 	return grid
 }
 
+func (g *Grid) Copy() *Grid {
+	grid := NewGrid(g.Width, g.Height)
+
+	for y, row := range g.Cells {
+		for x, r := range row {
+			grid.Cells[y][x] = r
+		}
+	}
+
+	return grid
+}
+
 func (g *Grid) Get(x, y int) byte {
 	if y < 0 || y >= g.Height || x < 0 || x >= g.Width {
 		return ' '
